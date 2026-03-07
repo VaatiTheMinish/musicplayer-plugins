@@ -1,0 +1,39 @@
+name: Build Plugins
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # Detects which plugin folders have changes
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      obssongoverlay: ${{ steps.filter.outputs.obssongoverlay }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            obssongoverlay:
+              - 'obssongoverlay/**'
+
+  build-obssongoverlay:
+    needs: changes
+    if: needs.changes.outputs.obssongoverlay == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      - name: Build
+        run: ./gradlew shadowJar
+        working-directory: obssongoverlay
+      - uses: actions/upload-artifact@v4
+        with:
+          name: obssongoverlay
+          path: obssongoverlay/build/libs/obssongoverlay.jar
