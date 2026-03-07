@@ -1,3 +1,18 @@
+# How CI works:
+#   The 'changes' job uses dorny/paths-filter to check which plugin folders have
+#   modified files. Only the build job for that plugin runs — other plugins are
+#   skipped entirely.
+#
+# Adding a new plugin:
+#   1. Add a new entry under 'filters:' in the 'changes' job:
+#        myplugin:
+#          - 'myplugin/**'
+#   2. Add a new build job copying the 'build-obssongoverlay' pattern:
+#        build-myplugin:
+#          needs: changes
+#          if: needs.changes.outputs.myplugin == 'true'
+#          ...
+
 name: Build Plugins
 
 on:
