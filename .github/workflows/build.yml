@@ -26,6 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       obssongoverlay: ${{ steps.filter.outputs.obssongoverlay }}
+      ytdlpgui: ${{ steps.filter.outputs.ytdlpgui }}
+      durationfilter: ${{ steps.filter.outputs.durationfilter }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -34,8 +36,12 @@ jobs:
           filters: |
             obssongoverlay:
               - 'obssongoverlay/**'
+            ytdlpgui:
+              - 'ytdlpgui/**'
+            durationfilter:
+              - 'durationfilter/**'
 
-  build-obssongoverlay:
+  build-songexport:
     needs: changes
     if: needs.changes.outputs.obssongoverlay == 'true'
     runs-on: ubuntu-latest
@@ -45,10 +51,46 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: gradle
       - name: Build
-        run: ./gradlew shadowJar
-        working-directory: obssongoverlay
+        run: ./gradlew :songexport:shadowJar
       - uses: actions/upload-artifact@v4
         with:
-          name: obssongoverlay
-          path: obssongoverlay/build/libs/obssongoverlay.jar
+          name: songexport
+          path: songexport/build/libs/songexport.jar
+
+  build-ytdlpgui:
+    needs: changes
+    if: needs.changes.outputs.ytdlpgui == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+      - name: Build
+        run: ./gradlew :ytdlpgui:shadowJar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ytdlpgui
+          path: ytdlpgui/build/libs/ytdlpgui.jar
+
+  build-durationfilter:
+    needs: changes
+    if: needs.changes.outputs.durationfilter == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+      - name: Build
+        run: ./gradlew :durationfilter:shadowJar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: durationfilter
+          path: durationfilter/build/libs/durationfilter.jar
